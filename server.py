@@ -42,7 +42,8 @@ async def offer(request):
     await pc.setRemoteDescription(offer)
 
     receivers = pc.getReceivers()
-    pc.addTrack(receivers[0].track)
+    rtcRtpSender = pc.addTrack(receivers[0].track)
+    rtcRtpSender.setPlayoutDelay(0, 0)
 
     answer = await pc.createAnswer()
     await pc.setLocalDescription(answer)

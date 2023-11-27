@@ -29,13 +29,21 @@ function createPeerConnection() {
     return pc;
 }
 
+function addPlayoutHeader(offer) {
+    let pos = offer.sdp.indexOf('a=sendrecv');
+    offer.sdp = offer.sdp.slice(0, pos) + 'a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay\r\n' + offer.sdp.slice(pos);
+    return offer
+}
+
 function negotiate() {
-    const audioCapabilities = RTCRtpReceiver.getCapabilities('audio')
-    audioCapabilities.codecs = audioCapabilities.codecs.filter(c => c.mimeType === 'audio/PCMU')
-    pc.getTransceivers()[0].setCodecPreferences(audioCapabilities.codecs)
+    if (false) {
+        const audioCapabilities = RTCRtpReceiver.getCapabilities('audio')
+        audioCapabilities.codecs = audioCapabilities.codecs.filter(c => c.mimeType === 'audio/PCMU')
+        pc.getTransceivers()[0].setCodecPreferences(audioCapabilities.codecs)
+    }
 
     return pc.createOffer()
-    .then(o => pc.setLocalDescription(o))
+    .then(o => pc.setLocalDescription(addPlayoutHeader(o)))
     .then(function() {
         return new Promise(function(resolve) {
             if (pc.iceGatheringState === 'complete') {
